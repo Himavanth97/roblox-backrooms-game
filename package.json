@@ -13,6 +13,7 @@
     "three": "^0.160.0"
   },
   "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "vite": "^5.0.0"
   }
 }

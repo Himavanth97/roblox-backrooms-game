@@ -196,6 +196,20 @@ export class MonsterController {
       this.state = 'CHASE';
     }
 
+    // 2b. Drain player sanity based on monster proximity and state
+    let monsterSanityDrain = 0;
+    if (this.state === 'CHASE') {
+      monsterSanityDrain = 15.0; // Rapid drain in chase
+    } else if (this.state === 'STALK') {
+      monsterSanityDrain = 5.0;  // Creepy drain in stalking
+    } else if (distToPlayer < 15.0) {
+      monsterSanityDrain = (15.0 - distToPlayer) * 0.4; // Proximity drain even in wander
+    }
+
+    if (monsterSanityDrain > 0) {
+      this.player.sanity = Math.max(0, this.player.sanity - monsterSanityDrain * timeDelta);
+    }
+
     // 3. Move along active state paths
     let target = new THREE.Vector3();
     

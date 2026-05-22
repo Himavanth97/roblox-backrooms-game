@@ -38,6 +38,10 @@ export class PlayerController {
     this.staminaDepletionRate = 22; // Stamina drain per second sprinting
     this.staminaRecoveryRate = 12; // Stamina recovery per second walking
     
+    // Sanity System
+    this.sanity = 100;
+    this.maxSanity = 100;
+    
     // Flashlight System
     this.flashlightOn = true;
     this.battery = 100;
@@ -170,7 +174,31 @@ export class PlayerController {
     const isPointerLocked = document.pointerLockElement !== null;
     if (!isPointerLocked) return;
 
-    // 1. Flashlight Battery Drain & Flickers
+    // 1. Sanity Calculations
+    let sanityChange = 0;
+    if (!this.flashlightOn) {
+      sanityChange -= 1.6; // dark drains sanity
+    } else {
+      sanityChange += 0.45; // flashlight ON slowly recovers sanity
+    }
+
+    // Standing close to fluorescent ceiling lights recovers sanity
+    let nearestLightDist = 999.0;
+    this.maze.lightFixtures.forEach(fix => {
+      const dist = this.position.distanceTo(new THREE.Vector3(fix.x, this.position.y, fix.z));
+      if (dist < nearestLightDist) {
+        nearestLightDist = dist;
+      }
+    });
+
+    if (nearestLightDist < 2.5) {
+      sanityChange += 2.8; // Standing under ceiling lights helps stay calm!
+    }
+
+    // Apply sanity change, clamped between 0 and 100
+    this.sanity = Math.max(0, Math.min(this.maxSanity, this.sanity + sanityChange * timeDelta));
+
+    // 2. Flashlight Battery Drain & Flickers
     if (this.flashlightOn && this.battery > 0) {
       this.battery = Math.max(0, this.battery - this.batteryDepletionRate * timeDelta);
       
@@ -309,6 +337,7 @@ export class PlayerController {
     // Fill values
     document.getElementById('stamina-fill').style.width = `${this.stamina}%`;
     document.getElementById('battery-fill').style.width = `${this.battery}%`;
+    document.getElementById('sanity-fill').style.width = `${this.sanity}%`;
 
     // High quality colors for low levels
     const staminaFill = document.getElementById('stamina-fill');
@@ -334,12 +363,40 @@ export class PlayerController {
       batteryFill.style.backgroundColor = 'var(--color-hud-green)';
       batteryFill.style.boxShadow = '0 0 6px rgba(34, 197, 94, 0.6)';
     }
+
+    const sanityFill = document.getElementById('sanity-fill');
+    if (this.sanity < 20) {
+      sanityFill.style.backgroundColor = 'var(--color-hud-red)';
+      sanityFill.style.boxShadow = '0 0 6px rgba(239, 68, 68, 0.6)';
+    } else if (this.sanity < 50) {
+      sanityFill.style.backgroundColor = 'var(--color-hud-yellow)';
+      sanityFill.style.boxShadow = '0 0 6px rgba(234, 179, 8, 0.6)';
+    } else {
+      sanityFill.style.backgroundColor = '#a855f7'; // Purple sanity
+      sanityFill.style.boxShadow = '0 0 6px rgba(168, 85, 247, 0.6)';
+    }
+
+    // Toggle HUD blinking alerts
+    const alertBatt = document.getElementById('alert-batt');
+    if (this.battery < 20) {
+      alertBatt.classList.remove('hidden');
+    } else {
+      alertBatt.classList.add('hidden');
+    }
+
+    const alertSanity = document.getElementById('alert-sanity');
+    if (this.sanity < 20) {
+      alertSanity.classList.remove('hidden');
+    } else {
+      alertSanity.classList.add('hidden');
+    }
   }
 
   reset() {
     this.position.set(6, this.height, 6);
     this.stamina = 100;
     this.battery = 100;
+    this.sanity = 100;
     this.collectedFuses = 0;
     this.flashlightOn = true;
     this.flashlight.intensity = 4.0;

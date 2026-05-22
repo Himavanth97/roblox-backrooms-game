@@ -26,6 +26,7 @@ class GameApp {
     this.isWon = false;
     this.gameStartTime = 0;
     this.elapsedTime = 0;
+    this.glitchTimer = 0;
     
     // Frame delta timings
     this.clock = new THREE.Clock();
@@ -221,6 +222,37 @@ class GameApp {
 
       // 1. Update Player position & controller physics
       this.player.update(timeDelta);
+
+      // Camera Wobble & head sway at low sanity (simulates panic/madness)
+      if (this.player.sanity < 50) {
+        const sanityDeficit = 100 - this.player.sanity;
+        const swayAmount = sanityDeficit * 0.00018; 
+        const speed = 0.006 - (this.player.sanity * 0.00004);
+        
+        // Z-axis head-roll oscillation
+        this.camera.rotation.z = Math.sin(Date.now() * speed) * swayAmount * 1.5;
+        
+        // Subtle positional sways added to camera
+        const posSwayX = Math.sin(Date.now() * speed * 0.8) * (sanityDeficit * 0.003);
+        const posSwayY = Math.cos(Date.now() * speed * 0.5) * (sanityDeficit * 0.002);
+        this.camera.position.x += posSwayX;
+        this.camera.position.y += posSwayY;
+      } else {
+        this.camera.rotation.z = 0; // reset Z-roll
+      }
+
+      // Periodic VHS screening glitches (random interval tracking)
+      this.glitchTimer += timeDelta;
+      if (this.glitchTimer > 5.0 + Math.random() * 8.0) { // triggers every 5-13 seconds
+        this.glitchTimer = 0;
+        const crt = document.getElementById('crt-monitor');
+        if (crt) {
+          crt.classList.add('vhs-glitch');
+          setTimeout(() => {
+            crt.classList.remove('vhs-glitch');
+          }, 150 + Math.random() * 200); // lasts 150-350ms
+        }
+      }
 
       // 2. Update Maze animations (light flickers, item spins)
       this.maze.update(timeDelta);

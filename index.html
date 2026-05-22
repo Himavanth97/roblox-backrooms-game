@@ -36,6 +36,8 @@
       <div class="hud-top-right">
         <div class="hud-text">SP</div>
         <div class="hud-text">120 min</div>
+        <div id="alert-batt" class="hud-alert hidden">BATT LOW</div>
+        <div id="alert-sanity" class="hud-alert hidden">SANITY LOW</div>
       </div>
       
       <div class="hud-bottom-left">
@@ -44,6 +46,14 @@
       </div>
       
       <div class="hud-bottom-right">
+        <!-- Sanity Display -->
+        <div class="bar-container">
+          <span class="bar-label">SANITY</span>
+          <div class="bar-wrapper">
+            <div id="sanity-fill" class="bar-fill sanity"></div>
+          </div>
+        </div>
+
         <!-- Stamina Display -->
         <div class="bar-container">
           <span class="bar-label">STAMINA</span>

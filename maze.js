@@ -275,6 +275,11 @@ export class MazeEngine {
           wallMesh.receiveShadow = true;
           this.scene.add(wallMesh);
           
+          // Spawn wall copper/metal detailing pipes (45% chance per wall cell)
+          if (Math.random() > 0.55) {
+            this.createWallPipes(posX, posZ);
+          }
+          
           // Store in walls array for dynamic bounding box collision handling
           this.walls.push(new THREE.Box3().setFromObject(wallMesh));
         }
@@ -362,6 +367,48 @@ export class MazeEngine {
       flickerState: true,
       x: x,
       z: z
+    });
+  }
+
+  // Spawns industrial copper piping along the upper portion of a wall segment on both sides
+  createWallPipes(x, z) {
+    const pipeMaterial = new THREE.MeshStandardMaterial({
+      color: 0x9a3412, // Rich copper brown
+      metalness: 0.95,
+      roughness: 0.15
+    });
+    
+    const bracketMaterial = new THREE.MeshStandardMaterial({
+      color: 0x4b5563, // Dark grey iron brackets
+      metalness: 0.8,
+      roughness: 0.4
+    });
+
+    const pipeHeight = 3.1;
+    const thicknessOffset = 0.155; // Just outside the 0.3 wall thickness
+
+    // We spawn pipes on both sides of the wall segment (North and South faces)
+    [-1, 1].forEach(side => {
+      const zPos = z + side * thicknessOffset;
+
+      // Main horizontal pipe running along X axis
+      const pipeGeo = new THREE.CylinderGeometry(0.05, 0.05, this.cellSize, 8);
+      pipeGeo.rotateZ(Math.PI / 2); // Lay horizontal along X
+      const pipe = new THREE.Mesh(pipeGeo, pipeMaterial);
+      pipe.position.set(x, pipeHeight, zPos);
+      pipe.castShadow = true;
+      pipe.receiveShadow = true;
+      this.scene.add(pipe);
+
+      // Support brackets holding the pipe
+      [-2.0, 2.0].forEach(xOffset => {
+        const bracketGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.12, 8);
+        bracketGeo.rotateX(Math.PI / 2); // Attach perpendicular to wall
+        const bracket = new THREE.Mesh(bracketGeo, bracketMaterial);
+        bracket.position.set(x + xOffset, pipeHeight, zPos - side * 0.01);
+        bracket.castShadow = true;
+        this.scene.add(bracket);
+      });
     });
   }
 

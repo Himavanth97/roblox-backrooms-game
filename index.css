@@ -1,0 +1,641 @@
+/* -------------------------------------------------------------
+   BACKROOMS: FOUND FOOTAGE 3D - CSS Design System & Style Guide
+   ------------------------------------------------------------- */
+
+:root {
+  --font-vhs: 'Share Tech Mono', monospace;
+  --font-horror: 'Special Elite', system-ui, serif;
+  
+  /* Color Palettes */
+  --color-bg: #030303;
+  --color-text-vhs: #e5e7eb;
+  --color-vhs-yellow: #f59e0b; /* Amber CRT */
+  --color-hud-green: #22c55e;
+  --color-hud-yellow: #eab308;
+  --color-hud-red: #ef4444;
+  --color-hud-cyan: #06b6d4;
+  
+  /* Styling Tokens */
+  --border-radius: 4px;
+  --crt-curve: radial-gradient(circle, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
+  --glow-vhs: 0 0 10px rgba(245, 158, 11, 0.5);
+  --glow-green: 0 0 10px rgba(34, 197, 94, 0.5);
+  --glow-red: 0 0 10px rgba(239, 68, 68, 0.7);
+}
+
+/* Reset and Core Layout */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #000;
+  color: var(--color-text-vhs);
+  font-family: var(--font-vhs);
+}
+
+/* CRT Screen Wrapper */
+#crt-monitor {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  box-shadow: inset 0 0 120px rgba(0,0,0,0.9);
+}
+
+/* Vignette overlay for dark claustrophobic feel */
+#crt-monitor::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.85) 100%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Scanlines overlay using repeating-linear-gradient */
+.vhs-scanlines {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1.5px,
+    transparent 1.5px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* Base64 Noise static overlay */
+.vhs-static-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 14;
+}
+
+/* Flicker keyframe animation for realistic fluorescent tubes and CRT */
+@keyframes crt-flicker {
+  0% { opacity: 0.985; }
+  50% { opacity: 0.995; }
+  100% { opacity: 0.985; }
+}
+
+#crt-monitor {
+  animation: crt-flicker 0.15s infinite;
+}
+
+/* 3D Render Canvas Container */
+#canvas-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* -------------------------------------------------------------
+   HUD Overlay (Tape details, clock, stamina, batteries)
+   ------------------------------------------------------------- */
+.hud-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 40px 50px;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 8;
+  color: var(--color-text-vhs);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+}
+
+.hud-text {
+  font-size: 1.25rem;
+  letter-spacing: 1.5px;
+  margin-bottom: 5px;
+}
+
+.rec-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.35rem;
+  color: #f3f4f6;
+  text-shadow: 0 0 5px rgba(255,255,255,0.3);
+}
+
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-hud-red);
+  border-radius: 50%;
+  box-shadow: var(--glow-red);
+  animation: blink 1s infinite steps(2);
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.hud-top-left, .hud-top-right, .hud-bottom-left, .hud-bottom-right {
+  position: absolute;
+}
+
+.hud-top-left { top: 40px; left: 50px; }
+.hud-top-right { top: 40px; right: 50px; text-align: right; }
+.hud-bottom-left { bottom: 40px; left: 50px; }
+.hud-bottom-right { bottom: 40px; right: 50px; text-align: right; display: flex; flex-direction: column; gap: 12px; }
+
+/* Status Bars */
+.bar-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: flex-end;
+}
+
+.bar-label {
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  width: 70px;
+  text-align: right;
+  opacity: 0.95;
+}
+
+.bar-wrapper {
+  width: 160px;
+  height: 10px;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  padding: 1px;
+  background-color: rgba(0,0,0,0.65);
+}
+
+.bar-fill {
+  height: 100%;
+  width: 100%;
+  transition: width 0.15s ease-out, background-color 0.4s ease;
+}
+
+.bar-fill.stamina {
+  background-color: var(--color-hud-cyan);
+  box-shadow: 0 0 6px rgba(6, 182, 212, 0.6);
+}
+
+.bar-fill.battery {
+  background-color: var(--color-hud-green);
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+}
+
+.objective-display {
+  font-size: 1.05rem;
+  letter-spacing: 1px;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 4px 10px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: inline-block;
+  align-self: flex-end;
+}
+
+/* -------------------------------------------------------------
+   Menu screens & overlays
+   ------------------------------------------------------------- */
+.screen-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  background-color: rgba(3, 3, 3, 0.92);
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.screen-layer.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.screen-layer.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+.menu-container {
+  max-width: 650px;
+  width: 90%;
+  text-align: center;
+  padding: 50px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  position: relative;
+}
+
+.menu-container::before {
+  content: "";
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  border: 1px solid rgba(245, 158, 11, 0.1);
+  pointer-events: none;
+}
+
+.game-title {
+  font-family: var(--font-horror);
+  font-size: 4rem;
+  letter-spacing: 10px;
+  color: var(--color-vhs-yellow);
+  text-shadow: var(--glow-vhs);
+  margin-bottom: 5px;
+}
+
+.game-subtitle {
+  font-size: 1.25rem;
+  letter-spacing: 6px;
+  opacity: 0.75;
+  margin-bottom: 45px;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+/* High aesthetics styled buttons */
+.menu-btn {
+  font-family: var(--font-vhs);
+  font-size: 1.15rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: var(--color-text-vhs);
+  background-color: transparent;
+  border: 1px solid rgba(229, 231, 235, 0.3);
+  padding: 12px 30px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-btn::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.menu-btn:hover::before {
+  left: 100%;
+}
+
+.menu-btn:hover {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: var(--color-vhs-yellow);
+  color: var(--color-vhs-yellow);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+  transform: translateY(-2px);
+}
+
+.menu-btn:active {
+  transform: translateY(0);
+}
+
+.menu-btn.urgent {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+.menu-btn.urgent:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: var(--color-hud-red);
+  color: var(--color-hud-red);
+  box-shadow: var(--glow-red);
+}
+
+.menu-btn.success {
+  border-color: rgba(34, 197, 94, 0.4);
+}
+.menu-btn.success:hover {
+  background-color: rgba(34, 197, 94, 0.15);
+  border-color: var(--color-hud-green);
+  color: var(--color-hud-green);
+  box-shadow: var(--glow-green);
+}
+
+.menu-footer {
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  color: var(--color-hud-red);
+  opacity: 0.8;
+}
+
+/* -------------------------------------------------------------
+   Controls & Protocol Info
+   ------------------------------------------------------------- */
+.text-content {
+  text-align: left;
+  max-width: 680px;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  color: var(--color-vhs-yellow);
+  margin-bottom: 25px;
+  letter-spacing: 3px;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+  padding-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.controls-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.control-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.15);
+  padding-bottom: 6px;
+  font-size: 1.05rem;
+}
+
+.control-row strong {
+  color: var(--color-vhs-yellow);
+  font-weight: 500;
+}
+
+.protocol-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #9ca3af;
+  margin-bottom: 35px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* -------------------------------------------------------------
+   Loading Screen (VHS Insertion Simulation)
+   ------------------------------------------------------------- */
+.loading-container {
+  text-align: center;
+}
+
+.loading-title {
+  font-size: 1.5rem;
+  letter-spacing: 5px;
+  margin-bottom: 20px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.loading-bar {
+  width: 320px;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 0 auto;
+}
+
+.loading-bar-fill {
+  width: 0%;
+  height: 100%;
+  background-color: var(--color-vhs-yellow);
+  box-shadow: var(--glow-vhs);
+  animation: loading-anim 3s cubic-bezier(0.12, 0, 0.39, 0) forwards;
+}
+
+@keyframes loading-anim {
+  0% { width: 0%; }
+  35% { width: 45%; }
+  55% { width: 50%; }
+  85% { width: 85%; }
+  100% { width: 100%; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Rolling visual noise bands */
+.vhs-tracking-lines {
+  position: absolute;
+  left: 0; width: 100%; height: 35px;
+  background: rgba(255, 255, 255, 0.08);
+  filter: blur(4px);
+  pointer-events: none;
+  animation: tracking-slide 6s infinite linear;
+}
+
+@keyframes tracking-slide {
+  0% { top: -40px; }
+  100% { top: calc(100% + 40px); }
+}
+
+/* -------------------------------------------------------------
+   Game Over (Signal Lost)
+   ------------------------------------------------------------- */
+.game-over-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.color-bars {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  z-index: 1;
+  opacity: 0.12;
+}
+
+.color-bar {
+  flex: 1;
+  height: 100%;
+}
+
+.color-bar.grey { background: #d1d5db; }
+.color-bar.yellow { background: #facc15; }
+.color-bar.cyan { background: #22d3ee; }
+.color-bar.green { background: #4ade80; }
+.color-bar.magenta { background: #f472b6; }
+.color-bar.red { background: #f87171; }
+.color-bar.blue { background: #60a5fa; }
+
+.game-over-content {
+  position: relative;
+  z-index: 6;
+  text-align: center;
+}
+
+.lost-title {
+  font-family: var(--font-horror);
+  font-size: 5rem;
+  letter-spacing: 8px;
+  color: var(--color-hud-red);
+  text-shadow: var(--glow-red);
+  margin-bottom: 20px;
+}
+
+.lost-text {
+  font-size: 1.25rem;
+  letter-spacing: 4px;
+  margin-bottom: 50px;
+  opacity: 0.9;
+}
+
+/* -------------------------------------------------------------
+   Win Screen
+   ------------------------------------------------------------- */
+.win-container {
+  max-width: 600px;
+  width: 90%;
+  padding: 50px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  box-shadow: inset 0 0 20px rgba(34, 197, 94, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+}
+
+.win-title {
+  font-family: var(--font-horror);
+  font-size: 3.5rem;
+  letter-spacing: 4px;
+  color: var(--color-hud-green);
+  text-shadow: var(--glow-green);
+  margin-bottom: 10px;
+}
+
+.win-text {
+  font-size: 1.15rem;
+  letter-spacing: 2px;
+  color: #e5e7eb;
+  margin-bottom: 35px;
+}
+
+.stats-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 30px;
+  border-radius: var(--border-radius);
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.15rem;
+  letter-spacing: 1.5px;
+}
+
+.stat-row span:nth-child(2) {
+  color: var(--color-hud-green);
+}
+
+/* -------------------------------------------------------------
+   High-end Text Glitch Effect
+   ------------------------------------------------------------- */
+.glitch {
+  position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.glitch::before {
+  left: 2px;
+  text-shadow: -2px 0 #ff00c1;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  left: -2px;
+  text-shadow: -2px 0 #00fff9, 0 2px #00fff9;
+  clip: rect(85px, 450px, 140px, 0);
+  animation: glitch-anim2 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(15px, 9999px, 66px, 0); }
+  50% { clip: rect(85px, 9999px, 5px, 0); }
+  100% { clip: rect(34px, 9999px, 115px, 0); }
+}
+
+@keyframes glitch-anim2 {
+  0% { clip: rect(70px, 9999px, 105px, 0); }
+  50% { clip: rect(12px, 9999px, 85px, 0); }
+  100% { clip: rect(95px, 9999px, 20px, 0); }
+}
+
+/* -------------------------------------------------------------
+   Full Screen noise overlay (upon death/screamer)
+   ------------------------------------------------------------- */
+.full-noise {
+  opacity: 0.95 !important;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E") !important;
+}
+
+/* Responsiveness adjustments */
+@media (max-width: 768px) {
+  .hud-layer {
+    padding: 20px;
+  }
+  .hud-top-left { top: 20px; left: 20px; }
+  .hud-top-right { top: 20px; right: 20px; }
+  .hud-bottom-left { bottom: 20px; left: 20px; }
+  .hud-bottom-right { bottom: 20px; right: 20px; }
+  .bar-wrapper { width: 100px; }
+  .game-title { font-size: 2.8rem; }
+  .lost-title { font-size: 3.5rem; }
+  .menu-container { padding: 30px 20px; }
+}

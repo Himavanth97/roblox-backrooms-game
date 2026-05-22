@@ -1,0 +1,30 @@
+{
+  "name": "roblox-backrooms-game",
+  "tree": {
+    "$className": "DataModel",
+    
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage"
+    },
+    
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "MonsterScript": {
+        "$path": "src/server/MonsterAI.lua"
+      }
+    },
+    
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "FlashlightClient": {
+          "$path": "src/client/FlashlightClient.lua"
+        },
+        "HeadBobbingCam": {
+          "$path": "src/client/HeadBobbing.lua"
+        }
+      }
+    }
+  }
+}
